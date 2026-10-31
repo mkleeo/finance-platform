@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Transacao {
+  id        String   @id @default(cuid())
+  descricao String
+  valor     Float
+  tipo      String
+  categoria String   @default("Outros")
+  data      DateTime @default(now())
+  criadoEm  DateTime @default(now())
+}

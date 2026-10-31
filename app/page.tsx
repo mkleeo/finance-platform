@@ -20,6 +20,10 @@ import {
   obterDataAtual,
 } from "@/lib/formatters";
 import type { Transacao } from "@/lib/types/transacao";
+import {
+  buscarTransacoesNeon,
+  converterTransacaoNeon,
+} from "@/lib/transacoes-api";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -75,36 +79,55 @@ export default function Home() {
   ]);
 
   const [carregando, setCarregando] = useState(true);
+  
+const [salvandoTransacao, setSalvandoTransacao] = useState(false);
 
-  useEffect(() => {
-    const dadosSalvos = localStorage.getItem("transacoes");
+const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
-    if (dadosSalvos) {
-      try {
-        const dados = JSON.parse(dadosSalvos);
 
-        if (Array.isArray(dados)) {
-          setTransacoes(dados);
-        }
-      } catch (erro) {
-        console.error("Erro ao carregar transações:", erro);
-      }
+
+useEffect(() => {
+  async function testarConexaoNeon() {
+    try {
+      const dados = await buscarTransacoesNeon();
+
+const transacoesConvertidas = dados.map(converterTransacaoNeon);
+
+
+setTransacoes(transacoesConvertidas);
+
+    } catch (erro) {
+      console.error("Erro na conexão com o Neon:", erro);
     }
+  }
 
-    setCarregando(false);
-  }, []);
+  testarConexaoNeon();
+}, []);
 
+  
+useEffect(() => {
+  setCarregando(false);
+}, []);
+
+
+
+  
+  // Gravação no localStorage desativada temporariamente.
+  // Os dados antigos estão preservados para a migração.
+  /*
   useEffect(() => {
     if (!carregando) {
       localStorage.setItem("transacoes", JSON.stringify(transacoes));
     }
   }, [transacoes, carregando]);
+  */
+
 
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
   const [tipo, setTipo] = useState<"receita" | "despesa">("despesa");
-  const [idEmEdicao, setIdEmEdicao] = useState<number | null>(null);
-  const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null);
+  const [idEmEdicao, setIdEmEdicao] = useState<number | string | null>(null);
+  const [idParaExcluir, setIdParaExcluir] = useState<number | string | null>(null);
   const [categoria, setCategoria] = useState("Outros");
   const [data, setData] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("Todas");
@@ -230,7 +253,10 @@ const totalReceitasFiltradas = calcularReceitas(transacoesFiltradas);
     return false;
   };
 
-  const adicionarTransacao = () => {
+  
+const adicionarTransacao = async () => {
+  if (salvandoTransacao || salvandoEdicao) return;
+
     const descricaoLimpa = descricao.trim();
     const valorNumerico = Number(valor);
     
@@ -263,6 +289,34 @@ if (
 
     
     if (idEmEdicao !== null) {
+      setSalvandoEdicao(true);
+      
+      
+try {
+  const resposta = await fetch(
+    `/api/transacoes/${encodeURIComponent(String(idEmEdicao))}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        descricao: descricaoLimpa,
+        valor: valorNumerico,
+        tipo,
+        categoria,
+        data,
+      }),
+    }
+  );
+
+  if (!resposta.ok) {
+    const erro = await resposta.json();
+    toast.error(erro.erro || "Não foi possível atualizar a transação.");
+    return;
+  }
+
+      
       const listaAtualizada: Transacao[] = transacoes.map((transacao) =>
         transacao.id === idEmEdicao
           ? {
@@ -286,18 +340,46 @@ if (
         ? verificarAlertaOrcamento(transacaoEditada, listaAtualizada)
         : false;
 
-      if (!alertaExibido) {
-        toast.success("Transação atualizada com sucesso!");
-      }
-    } else {
-      const novaTransacao: Transacao = {
-        id: Date.now(),
-        descricao: descricaoLimpa,
-        valor: valorNumerico,
-        tipo,
-        categoria,
-        data,
-      };
+      
+if (!alertaExibido) {
+  toast.success("Transação atualizada com sucesso!");
+}
+} catch (erro) {
+  console.error("Erro ao atualizar transação:", erro);
+  toast.error("Erro de conexão ao atualizar a transação.");
+  return;
+} finally {
+  setSalvandoEdicao(false);
+}
+} else {
+
+      
+      
+setSalvandoTransacao(true);
+
+try {
+ const resposta = await fetch("/api/transacoes", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    descricao: descricaoLimpa,
+    valor: valorNumerico,
+    tipo,
+    categoria,
+    data,
+  }),
+});
+
+if (!resposta.ok) {
+  toast.error("Não foi possível cadastrar a transação no Neon.");
+  return;
+}
+
+const transacaoCriada = await resposta.json();
+const novaTransacao = converterTransacaoNeon(transacaoCriada);
+
 
       const listaAtualizada = [...transacoes, novaTransacao];
       setTransacoes(listaAtualizada);
@@ -307,10 +389,19 @@ if (
         listaAtualizada
       );
 
-      if (!alertaExibido) {
-        toast.success("Transação adicionada com sucesso!");
-      }
-    }
+      
+if (!alertaExibido) {
+  toast.success("Transação adicionada com sucesso!");
+}
+} catch (erro) {
+  console.error("Erro ao cadastrar transação:", erro);
+  toast.error("Erro de conexão ao cadastrar a transação.");
+  return;
+} finally {
+  setSalvandoTransacao(false);
+}
+}
+
 
     setDescricao("");
     setValor("");
@@ -319,7 +410,7 @@ if (
     setData(obterDataAtual());
   };
 
-  const excluirTransacao = (id: number) => {
+  const excluirTransacao = (id: number | string) => {
   setTransacoes((anteriores) =>
     anteriores.filter((transacao) => transacao.id !== id),
   );
@@ -328,7 +419,7 @@ if (
     description: "A transação foi removida do seu histórico.",
   });
 };
-  const editarTransacao = (id: number) => {
+  const editarTransacao = (id: number | string) => {
     const transacao = transacoes.find((item) => item.id === id);
     if (!transacao) return;
 
@@ -553,10 +644,13 @@ toast.success("Exportação iniciada!", {
             </div>
           </div>
 
-          <Button
-            className="mt-5 gap-2 rounded-xl bg-blue-600 px-5 py-5 font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md"
-            onClick={adicionarTransacao}
-          >
+          
+<Button
+  className="mt-5 gap-2 rounded-xl bg-blue-600 px-5 py-5 font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md"
+  onClick={adicionarTransacao}
+  disabled={salvandoTransacao}
+>
+
             {idEmEdicao !== null ? (
               <Save className="h-4 w-4" />
             ) : (

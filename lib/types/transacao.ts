@@ -1,6 +1,6 @@
 
 export type Transacao = {
-  id: number;
+  id: number | string;
   descricao: string;
   valor: number;
   tipo: "receita" | "despesa";

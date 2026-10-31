@@ -22,11 +22,18 @@ import { CATEGORIAS } from "@/lib/categories";
 import { calcularReceitas, calcularDespesas, calcularSaldo } from "@/lib/calculations";
 import type { Transacao } from "@/lib/types/transacao";
 
+import {
+  buscarTransacoesNeon,
+  converterTransacaoNeon,
+} from "@/lib/transacoes-api";
+
+
 const MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const CHAVE_TRANSACOES = "transacoes";
 
 type Edicao = {
-  id: number;
+  
+  id: number | string;
   descricao: string;
   valor: string;
   tipo: "receita" | "despesa";
@@ -50,22 +57,37 @@ export default function TransactionsPage() {
   const [filtroMes, setFiltroMes] = useState("todos");
   const [filtroAno, setFiltroAno] = useState("todos");
   const [edicao, setEdicao] = useState<Edicao | null>(null);
-  const [idParaExcluir, setIdParaExcluir] = useState<number | null>(null);
+  
+const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
-  useEffect(() => {
+const [excluindoTransacao, setExcluindoTransacao] = useState(false);
+
+
+  const [idParaExcluir, setIdParaExcluir] = useState<number | string | null>(null);
+
+
+  
+useEffect(() => {
+  async function carregarTransacoes() {
     try {
-      const salvas = localStorage.getItem(CHAVE_TRANSACOES);
-      if (salvas) {
-        const dados: unknown = JSON.parse(salvas);
-        if (Array.isArray(dados)) setTransacoes(dados as Transacao[]);
-      }
+      const dados = await buscarTransacoesNeon();
+
+      const transacoesConvertidas = dados.map(
+        converterTransacaoNeon
+      );
+
+      setTransacoes(transacoesConvertidas);
     } catch (erro) {
-      console.error("Erro ao carregar transações:", erro);
-      toast.error("Não foi possível carregar as transações.");
+      console.error("Erro ao carregar transações do Neon:", erro);
+      toast.error("Não foi possível carregar as transações do Neon.");
     } finally {
       setCarregando(false);
     }
-  }, []);
+  }
+
+  carregarTransacoes();
+}, []);
+
 
   const anosDisponiveis = useMemo(() => {
     const anos = new Set<string>();
@@ -83,7 +105,12 @@ export default function TransactionsPage() {
         (filtroCategoria === "todas" || (item.categoria ?? "Outros") === filtroCategoria) &&
         (filtroMes === "todos" || data.slice(5, 7) === filtroMes) &&
         (filtroAno === "todos" || data.slice(0, 4) === filtroAno);
-    }).sort((a, b) => (b.data ?? "").localeCompare(a.data ?? "") || b.id - a.id);
+    
+}).sort((a, b) =>
+  (b.data ?? "").localeCompare(a.data ?? "") ||
+  String(b.id).localeCompare(String(a.id))
+);
+
   }, [transacoes, busca, filtroTipo, filtroCategoria, filtroMes, filtroAno]);
 
   const filtrosAtivos = busca.trim() !== "" || filtroTipo !== "todos" || filtroCategoria !== "todas" || filtroMes !== "todos" || filtroAno !== "todos";
@@ -97,17 +124,15 @@ export default function TransactionsPage() {
     setFiltroMes("todos"); setFiltroAno("todos");
   }
 
-  function persistir(lista: Transacao[]) {
-    try {
-      localStorage.setItem(CHAVE_TRANSACOES, JSON.stringify(lista));
-      setTransacoes(lista);
-      return true;
-    } catch (erro) {
-      console.error("Erro ao salvar transações:", erro);
-      toast.error("Não foi possível salvar as alterações no navegador.");
-      return false;
-    }
-  }
+  
+function persistir(_lista: Transacao[]) {
+  toast.error(
+    "Edição e exclusão temporariamente indisponíveis. Estamos integrando o Neon."
+  );
+
+  return false;
+}
+
 
   function iniciarEdicao(item: Transacao) {
     setEdicao({
@@ -117,30 +142,116 @@ export default function TransactionsPage() {
     });
   }
 
-  function salvarEdicao() {
-    if (!edicao) return;
+  
+async function salvarEdicao() {
+
+    
+if (!edicao || salvandoEdicao) return;
+
     const descricao = edicao.descricao.trim();
     const valor = Number(edicao.valor);
     if (!descricao) { toast.error("Informe uma descrição."); return; }
     if (!Number.isFinite(valor) || valor <= 0) { toast.error("Informe um valor maior que zero."); return; }
     if (edicao.data && !dataValida(edicao.data)) { toast.error("Informe uma data válida."); return; }
 
-    const atualizadas = transacoes.map((item) => item.id === edicao.id ? {
-      ...item, descricao, valor, tipo: edicao.tipo,
-      categoria: edicao.categoria, data: edicao.data || undefined,
-    } : item);
-    if (persistir(atualizadas)) {
-      setEdicao(null);
-      toast.success("Transação atualizada com sucesso!");
-    }
-  }
+    
+setSalvandoEdicao(true);
 
-  function excluirTransacao() {
-    if (idParaExcluir === null) return;
-    const atualizadas = transacoes.filter((item) => item.id !== idParaExcluir);
-    if (persistir(atualizadas)) toast.success("Transação excluída com sucesso!");
-    setIdParaExcluir(null);
+try {
+
+    
+const resposta = await fetch(
+  `/api/transacoes/${encodeURIComponent(String(edicao.id))}`,
+  {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      descricao,
+      valor,
+      tipo: edicao.tipo,
+      categoria: edicao.categoria,
+      data: edicao.data,
+    }),
   }
+);
+
+
+if (!resposta.ok) {
+  const erro = await resposta.json();
+
+  toast.error(
+    erro.erro || "Não foi possível atualizar a transação."
+  );
+
+  return;
+}
+
+
+    
+const transacaoAtualizada = await resposta.json();
+
+const transacaoConvertida = converterTransacaoNeon(
+  transacaoAtualizada
+);
+
+setTransacoes((anteriores) =>
+  anteriores.map((item) =>
+    item.id === edicao.id ? transacaoConvertida : item
+  )
+);
+
+setEdicao(null);
+toast.success("Transação atualizada com sucesso!");
+
+
+} catch (erro) {
+  console.error("Erro ao salvar edição:", erro);
+  toast.error("Erro de conexão ao atualizar a transação.");
+} finally {
+  setSalvandoEdicao(false);
+}
+
+}
+  
+
+async function excluirTransacao() {
+  if (idParaExcluir === null || excluindoTransacao) return;
+
+  setExcluindoTransacao(true);
+
+  try {
+    const resposta = await fetch(
+      `/api/transacoes/${encodeURIComponent(String(idParaExcluir))}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!resposta.ok) {
+      const erro = await resposta.json();
+
+      toast.error(
+        erro.erro || "Não foi possível excluir a transação."
+      );
+      return;
+    }
+
+    setTransacoes((anteriores) =>
+      anteriores.filter((item) => item.id !== idParaExcluir)
+    );
+
+    setIdParaExcluir(null);
+    toast.success("Transação excluída com sucesso!");
+  } catch (erro) {
+    console.error("Erro ao excluir transação:", erro);
+    toast.error("Erro de conexão ao excluir a transação.");
+  } finally {
+    setExcluindoTransacao(false);
+  }
+}
+
 
   function exportarCSV() {
     const linhas = [
@@ -265,14 +376,34 @@ export default function TransactionsPage() {
             <div className="space-y-2"><Label>Categoria</Label><Select value={edicao.categoria} onValueChange={(categoria) => setEdicao({ ...edicao, categoria })}><SelectTrigger className="w-full"><SelectValue /></SelectTrigger><SelectContent>{CATEGORIAS.map((cat) => <SelectItem key={cat} value={cat}>{cat}</SelectItem>)}</SelectContent></Select></div>
             <div className="space-y-2"><Label htmlFor="editar-data">Data (opcional)</Label><Input id="editar-data" type="date" value={edicao.data} onChange={(e) => setEdicao({ ...edicao, data: e.target.value })} /></div>
           </div>}
-          <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><Button type="button" onClick={salvarEdicao} className="bg-blue-600 hover:bg-blue-700">Salvar alterações</Button></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel>
+<Button
+  type="button"
+  onClick={salvarEdicao}
+  disabled={salvandoEdicao}
+  className="bg-blue-600 hover:bg-blue-700"
+>
+  {salvandoEdicao ? "Salvando..." : "Salvar alterações"}
+</Button>
+</AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={idParaExcluir !== null} onOpenChange={(aberto) => { if (!aberto) setIdParaExcluir(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader><AlertDialogTitle>Excluir transação?</AlertDialogTitle><AlertDialogDescription>Você está prestes a excluir <strong>{transacaoParaExcluir?.descricao ?? "esta transação"}</strong>. Esta ação não poderá ser desfeita.</AlertDialogDescription></AlertDialogHeader>
-          <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel><AlertDialogAction onClick={excluirTransacao} className="bg-red-600 text-white hover:bg-red-700">Excluir transação</AlertDialogAction></AlertDialogFooter>
+          <AlertDialogFooter><AlertDialogCancel>Cancelar</AlertDialogCancel>
+<AlertDialogAction
+  onClick={(evento) => {
+    evento.preventDefault();
+    void excluirTransacao();
+  }}
+  disabled={excluindoTransacao}
+  className="bg-red-600 text-white hover:bg-red-700"
+>
+  {excluindoTransacao ? "Excluindo..." : "Excluir transação"}
+</AlertDialogAction>
+</AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
     </main>
