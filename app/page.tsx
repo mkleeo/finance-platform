@@ -84,6 +84,8 @@ const [salvandoTransacao, setSalvandoTransacao] = useState(false);
 
 const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
+const [excluindoTransacao, setExcluindoTransacao] = useState(false);
+
 
 
 useEffect(() => {
@@ -128,6 +130,9 @@ useEffect(() => {
   const [tipo, setTipo] = useState<"receita" | "despesa">("despesa");
   const [idEmEdicao, setIdEmEdicao] = useState<number | string | null>(null);
   const [idParaExcluir, setIdParaExcluir] = useState<number | string | null>(null);
+  
+const [dialogoExclusaoAberto, setDialogoExclusaoAberto] = useState(false);
+
   const [categoria, setCategoria] = useState("Outros");
   const [data, setData] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState("Todas");
@@ -341,6 +346,7 @@ try {
         : false;
 
       
+
 if (!alertaExibido) {
   toast.success("Transação atualizada com sucesso!");
 }
@@ -352,6 +358,7 @@ if (!alertaExibido) {
   setSalvandoEdicao(false);
 }
 } else {
+
 
       
       
@@ -410,15 +417,46 @@ if (!alertaExibido) {
     setData(obterDataAtual());
   };
 
-  const excluirTransacao = (id: number | string) => {
-  setTransacoes((anteriores) =>
-    anteriores.filter((transacao) => transacao.id !== id),
-  );
+  
+const excluirTransacao = async (id: number | string) => {
+  
+if (excluindoTransacao) return;
 
-  toast.success("Transação excluída com sucesso!", {
-    description: "A transação foi removida do seu histórico.",
-  });
+setExcluindoTransacao(true);
+
+  try {
+    const resposta = await fetch(
+      `/api/transacoes/${encodeURIComponent(String(id))}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    if (!resposta.ok) {
+      const erro = await resposta.json();
+      toast.error(erro.erro || "Não foi possível excluir a transação.");
+      return;
+    }
+
+    setTransacoes((anteriores) =>
+      anteriores.filter((transacao) => transacao.id !== id)
+    );
+    
+setDialogoExclusaoAberto(false);
+setIdParaExcluir(null);
+
+
+    toast.success("Transação excluída com sucesso!");
+  
+} catch (erro) {
+  console.error("Erro ao excluir transação:", erro);
+  toast.error("Erro de conexão ao excluir a transação.");
+} finally {
+  setExcluindoTransacao(false);
+}
 };
+
+
   const editarTransacao = (id: number | string) => {
     const transacao = transacoes.find((item) => item.id === id);
     if (!transacao) return;
@@ -648,7 +686,9 @@ toast.success("Exportação iniciada!", {
 <Button
   className="mt-5 gap-2 rounded-xl bg-blue-600 px-5 py-5 font-semibold text-white shadow-sm transition-all duration-200 hover:bg-blue-700 hover:shadow-md"
   onClick={adicionarTransacao}
-  disabled={salvandoTransacao}
+  
+disabled={salvandoTransacao || salvandoEdicao}
+
 >
 
             {idEmEdicao !== null ? (
@@ -1022,7 +1062,12 @@ toast.success("Exportação iniciada!", {
                     className="rounded-lg bg-transparent text-red-600 shadow-none hover:bg-red-50 hover:text-red-700"
                     variant="ghost"
                     size="icon"
-                    onClick={() => setIdParaExcluir(transacao.id)}
+                    
+onClick={() => {
+  setIdParaExcluir(transacao.id);
+  setDialogoExclusaoAberto(true);
+}}
+
                     aria-label={`Excluir ${transacao.descricao}`}
                   >
                     <Trash2 className="h-4 w-4 text-red-600" />
@@ -1032,12 +1077,20 @@ toast.success("Exportação iniciada!", {
             ))}
           </div>
         </section>
-      <AlertDialog
-  open={idParaExcluir !== null}
-  onOpenChange={(open) => {
-    if (!open) setIdParaExcluir(null);
+      
+<AlertDialog
+  open={dialogoExclusaoAberto}
+  onOpenChange={(aberto) => {
+    if (!excluindoTransacao) {
+      setDialogoExclusaoAberto(aberto);
+
+      if (!aberto) {
+        setIdParaExcluir(null);
+      }
+    }
   }}
 >
+
   <AlertDialogContent>
     <AlertDialogHeader>
       <AlertDialogTitle>
@@ -1065,18 +1118,21 @@ toast.success("Exportação iniciada!", {
         Cancelar
       </AlertDialogCancel>
 
-      <AlertDialogAction
-        className="bg-red-600 text-white hover:bg-red-700"
-        onClick={() => {
-          if (idParaExcluir !== null) {
-            excluirTransacao(idParaExcluir);
-          }
+      
+<AlertDialogAction
+  className="bg-red-600 text-white hover:bg-red-700"
+  disabled={excluindoTransacao}
+  onClick={(evento) => {
+    evento.preventDefault();
 
-          setIdParaExcluir(null);
-        }}
-      >
-        Excluir transação
-      </AlertDialogAction>
+    if (idParaExcluir !== null) {
+      void excluirTransacao(idParaExcluir);
+    }
+  }}
+>
+  {excluindoTransacao ? "Excluindo..." : "Excluir transação"}
+</AlertDialogAction>
+
     </AlertDialogFooter>
   </AlertDialogContent>
 </AlertDialog>
