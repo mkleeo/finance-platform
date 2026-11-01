@@ -1,12 +1,23 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 
 export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return NextResponse.json(
+      { erro: "Você precisa estar autenticado." },
+      { status: 401 }
+    );
+  }
+
   const { id } = await context.params;
+
   
 if (!id || id.trim() === "") {
   return NextResponse.json(
@@ -126,11 +137,14 @@ if (data !== undefined && data !== "") {
 }
 
 
-const transacaoExistente = await prisma.transacao.findUnique({
+
+const transacaoExistente = await prisma.transacao.findFirst({
   where: {
     id,
+    usuarioId: session.user.id,
   },
 });
+
 
 if (!transacaoExistente) {
   return NextResponse.json(
@@ -156,15 +170,31 @@ const dadosAtualizados = {
 
   
 try {
-  const transacaoAtualizada = await prisma.transacao.update({
-    where: {
-      id,
-    },
-    data: dadosAtualizados,
-  });
+  
+const transacaoAtualizada = await prisma.transacao.update({
+  where: {
+    id,
+    usuarioId: session.user.id,
+  },
+  data: dadosAtualizados,
+});
+
 
   return NextResponse.json(transacaoAtualizada);
 } catch (erro) {
+  
+if (
+  typeof erro === "object" &&
+  erro !== null &&
+  "code" in erro &&
+  erro.code === "P2025"
+) {
+  return NextResponse.json(
+    { erro: "Transação não encontrada." },
+    { status: 404 }
+  );
+}
+
   console.error("Erro ao atualizar transação:", erro);
 
   return NextResponse.json(
@@ -181,6 +211,16 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    
+const session = await auth();
+
+if (!session?.user?.id) {
+  return NextResponse.json(
+    { erro: "Você precisa estar autenticado." },
+    { status: 401 }
+  );
+}
+
     const { id } = await context.params;
 
     if (!id || id.trim() === "") {
@@ -190,9 +230,14 @@ export async function DELETE(
       );
     }
 
-    const transacao = await prisma.transacao.findUnique({
-      where: { id },
-    });
+    
+const transacao = await prisma.transacao.findFirst({
+  where: {
+    id,
+    usuarioId: session.user.id,
+  },
+});
+
 
     if (!transacao) {
       return NextResponse.json(
@@ -201,14 +246,32 @@ export async function DELETE(
       );
     }
 
-    await prisma.transacao.delete({
-      where: { id },
-    });
+    
+await prisma.transacao.delete({
+  where: {
+    id,
+    usuarioId: session.user.id,
+  },
+});
+
 
     return NextResponse.json({
       mensagem: "Transação excluída com sucesso.",
     });
   } catch (erro) {
+    
+if (
+  typeof erro === "object" &&
+  erro !== null &&
+  "code" in erro &&
+  erro.code === "P2025"
+) {
+  return NextResponse.json(
+    { erro: "Transação não encontrada." },
+    { status: 404 }
+  );
+}
+
     console.error("Erro ao excluir transação:", erro);
 
     return NextResponse.json(

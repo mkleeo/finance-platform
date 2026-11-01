@@ -1,14 +1,31 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
+
 
 export async function GET() {
   try {
-    const transacoes = await prisma.transacao.findMany({
-      orderBy: {
-        data: "desc",
-      },
-    });
+    
+const session = await auth();
+
+if (!session?.user?.id) {
+  return NextResponse.json(
+    { erro: "Você precisa estar autenticado." },
+    { status: 401 }
+  );
+}
+
+    
+const transacoes = await prisma.transacao.findMany({
+  where: {
+    usuarioId: session.user.id,
+  },
+  orderBy: {
+    data: "desc",
+  },
+});
+
 
     return NextResponse.json(transacoes);
   } catch (erro) {
@@ -24,6 +41,16 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    
+const session = await auth();
+
+if (!session?.user?.id) {
+  return NextResponse.json(
+    { erro: "Você precisa estar autenticado." },
+    { status: 401 }
+  );
+}
+
     const dados = await request.json();
 
     const { descricao, valor, tipo, categoria, data } = dados;
@@ -65,6 +92,7 @@ const dataTransacao = data
 
     const novaTransacao = await prisma.transacao.create({
       data: {
+        usuarioId: session.user.id,
         descricao: descricao.trim(),
         valor,
         tipo,
