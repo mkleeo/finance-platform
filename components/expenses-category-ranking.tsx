@@ -12,7 +12,7 @@ type Props = {
 };
 
 const CORES = [
-  "bg-blue-600",
+  "bg-blue-500",
   "bg-emerald-500",
   "bg-amber-500",
   "bg-purple-500",
@@ -45,40 +45,40 @@ export function ExpensesCategoryRanking({ transacoes }: Props) {
   );
 
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
       <div className="mb-6 flex items-center gap-3">
-        <TrendingDown className="h-6 w-6 text-red-600" />
+        <TrendingDown className="h-6 w-6 text-rose-400" />
 
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">
+          <h2 className="text-xl font-semibold text-foreground">
             Despesas por Categoria
           </h2>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Veja quais categorias representam seus maiores gastos.
           </p>
         </div>
       </div>
 
       {categorias.length === 0 ? (
-        <div className="py-10 text-center text-sm text-slate-500">
+        <div className="py-10 text-center text-sm text-muted-foreground">
           Nenhuma despesa encontrada no período selecionado.
         </div>
       ) : (
         <>
-          <div className="mb-6 rounded-xl bg-blue-50 p-4">
-            <div className="flex items-center gap-2 text-blue-700">
+          <div className="mb-6 rounded-xl border border-border bg-muted p-4">
+            <div className="flex items-center gap-2 text-sky-400">
               <Trophy className="h-5 w-5" />
               <span className="text-sm font-semibold">
                 Categoria com maior despesa
               </span>
             </div>
 
-            <p className="mt-2 text-lg font-bold text-slate-900">
+            <p className="mt-2 text-lg font-bold text-foreground">
               {categorias[0].nome}
             </p>
 
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm text-muted-foreground">
               {formatarMoeda(categorias[0].valor)}
             </p>
           </div>
@@ -93,16 +93,16 @@ export function ExpensesCategoryRanking({ transacoes }: Props) {
               return (
                 <div key={categoria.nome}>
                   <div className="mb-2 flex items-center justify-between gap-3">
-                    <span className="text-sm font-medium text-slate-800">
+                    <span className="text-sm font-medium text-foreground">
                       {indice + 1}. {categoria.nome}
                     </span>
 
-                    <span className="text-sm font-semibold text-slate-900">
+                    <span className="text-sm font-semibold text-foreground">
                       {formatarMoeda(categoria.valor)}
                     </span>
                   </div>
 
-                  <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-3 overflow-hidden rounded-full bg-muted">
                     <div
                       className={`h-full rounded-full ${
                         CORES[indice % CORES.length]
@@ -111,23 +111,20 @@ export function ExpensesCategoryRanking({ transacoes }: Props) {
                     />
                   </div>
 
-                  <p className="mt-1 text-right text-xs text-slate-500">
-                    {porcentagem
-                      .toFixed(1)
-                      .replace(".", ",")}
-                    % das despesas
+                  <p className="mt-1 text-right text-xs text-muted-foreground">
+                    {porcentagem.toFixed(1).replace(".", ",")}% das despesas
                   </p>
                 </div>
               );
             })}
           </div>
 
-          <div className="mt-6 flex items-center justify-between border-t pt-5">
-            <span className="font-semibold text-slate-700">
+          <div className="mt-6 flex items-center justify-between border-t border-border pt-5">
+            <span className="font-semibold text-foreground">
               Total de despesas
             </span>
 
-            <span className="text-lg font-bold text-red-600">
+            <span className="text-lg font-bold text-rose-400">
               {formatarMoeda(total)}
             </span>
           </div>

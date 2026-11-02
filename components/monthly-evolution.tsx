@@ -118,12 +118,12 @@ export function MonthlyEvolution({
 
   if (!dados) {
     return (
-      <section className="rounded-2xl border bg-white p-6 shadow-sm">
-        <h2 className="text-xl font-semibold text-slate-900">
+      <section className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
+        <h2 className="text-xl font-semibold text-foreground">
           Evolução Financeira Mensal
         </h2>
 
-        <p className="mt-3 text-sm text-slate-500">
+        <p className="mt-3 text-sm text-muted-foreground">
           Selecione um mês no filtro acima para comparar com o mês anterior.
         </p>
       </section>
@@ -133,16 +133,16 @@ export function MonthlyEvolution({
   const diferencaSaldo = dados.saldo - dados.saldoAnterior;
 
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
       <div className="mb-6 flex items-center gap-3">
-        <ArrowLeftRight className="h-6 w-6 text-blue-600" />
+        <ArrowLeftRight className="h-6 w-6 text-sky-400" />
 
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">
+          <h2 className="text-xl font-semibold text-foreground">
             Evolução Financeira Mensal
           </h2>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             {dados.periodoAtual} comparado com{" "}
             {dados.periodoAnterior}
           </p>
@@ -150,66 +150,66 @@ export function MonthlyEvolution({
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-xl border border-emerald-200 p-4">
-          <TrendingUp className="mb-3 h-5 w-5 text-emerald-600" />
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+          <TrendingUp className="mb-3 h-5 w-5 text-emerald-400" />
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Evolução das receitas
           </p>
 
-          <p className="mt-2 text-xl font-bold text-emerald-600">
+          <p className="mt-2 text-xl font-bold text-emerald-400">
             {formatarMoeda(dados.receitas)}
           </p>
 
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-muted-foreground">
             Mês anterior:{" "}
             {formatarMoeda(dados.receitasAnteriores)}
           </p>
 
-          <p className="mt-2 text-sm font-medium">
+          <p className="mt-2 text-sm font-medium text-foreground">
             {formatarPercentual(dados.variacaoReceitas)}
           </p>
         </div>
 
-        <div className="rounded-xl border border-red-200 p-4">
-          <TrendingDown className="mb-3 h-5 w-5 text-red-600" />
+        <div className="rounded-xl border border-rose-500/20 bg-rose-500/5 p-4">
+          <TrendingDown className="mb-3 h-5 w-5 text-rose-400" />
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Evolução das despesas
           </p>
 
-          <p className="mt-2 text-xl font-bold text-red-600">
+          <p className="mt-2 text-xl font-bold text-rose-400">
             {formatarMoeda(dados.despesas)}
           </p>
 
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-muted-foreground">
             Mês anterior:{" "}
             {formatarMoeda(dados.despesasAnteriores)}
           </p>
 
-          <p className="mt-2 text-sm font-medium">
+          <p className="mt-2 text-sm font-medium text-foreground">
             {formatarPercentual(dados.variacaoDespesas)}
           </p>
         </div>
 
-        <div className="rounded-xl border border-blue-200 p-4">
-          <Wallet className="mb-3 h-5 w-5 text-blue-600" />
+        <div className="rounded-xl border border-sky-500/20 bg-sky-500/5 p-4">
+          <Wallet className="mb-3 h-5 w-5 text-sky-400" />
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Evolução do saldo
           </p>
 
           <p
             className={`mt-2 text-xl font-bold ${
               dados.saldo >= 0
-                ? "text-blue-600"
-                : "text-red-600"
+                ? "text-sky-400"
+                : "text-rose-400"
             }`}
           >
             {formatarMoeda(dados.saldo)}
           </p>
 
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-muted-foreground">
             Mês anterior:{" "}
             {formatarMoeda(dados.saldoAnterior)}
           </p>
@@ -217,8 +217,8 @@ export function MonthlyEvolution({
           <p
             className={`mt-2 text-sm font-medium ${
               diferencaSaldo >= 0
-                ? "text-emerald-600"
-                : "text-red-600"
+                ? "text-emerald-400"
+                : "text-rose-400"
             }`}
           >
             Diferença: {formatarMoeda(diferencaSaldo)}

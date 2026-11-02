@@ -3,7 +3,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 import {
   LayoutDashboard,
   ArrowLeftRight,
@@ -13,43 +12,25 @@ import {
 } from "lucide-react";
 
 const menuItems = [
-  {
-    nome: "Dashboard",
-    href: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    nome: "Transactions",
-    href: "/transactions",
-    icon: ArrowLeftRight,
-  },
-  {
-    nome: "Reports",
-    href: "/reports",
-    icon: ChartPie,
-  },
-  {
-    nome: "Settings",
-    href: "/settings",
-    icon: Settings,
-  },
+  { nome: "Dashboard", href: "/", icon: LayoutDashboard },
+  { nome: "Transactions", href: "/transactions", icon: ArrowLeftRight },
+  { nome: "Reports", href: "/reports", icon: ChartPie },
+  { nome: "Settings", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex min-h-screen w-64 shrink-0 flex-col border-r bg-white p-6">
-      {/* Logo */}
+    <aside className="flex min-h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar p-6 text-sidebar-foreground">
       <Link href="/" className="mb-10 flex items-center gap-3">
-        <Wallet className="h-8 w-8 text-emerald-600" />
+        <Wallet className="h-8 w-8 text-sidebar-primary" />
 
-        <h1 className="text-xl font-bold text-gray-900">
+        <h1 className="text-xl font-bold">
           Finance Platform
         </h1>
       </Link>
 
-      {/* Menu de navegação */}
       <nav className="flex flex-col gap-2">
         {menuItems.map((item) => {
           const Icone = item.icon;
@@ -67,8 +48,8 @@ export function Sidebar() {
               aria-current={ativo ? "page" : undefined}
               className={`flex items-center gap-3 rounded-lg p-3 transition-colors ${
                 ativo
-                  ? "bg-emerald-50 font-medium text-emerald-700"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  ? "bg-sidebar-accent font-medium text-sidebar-primary"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
               }`}
             >
               <Icone className="h-5 w-5" />
@@ -78,8 +59,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Rodapé */}
-      <div className="mt-auto border-t pt-6 text-sm text-gray-400">
+      <div className="mt-auto border-t border-sidebar-border pt-6 text-sm text-muted-foreground">
         Finance Platform v1.0
       </div>
     </aside>

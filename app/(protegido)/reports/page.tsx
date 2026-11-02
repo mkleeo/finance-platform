@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ExpensesCategoryRanking } from "@/components/expenses-category-ranking";
 import { MonthlyEvolution } from "@/components/monthly-evolution";
 import { MonthlyBudget } from "@/components/monthly-budget";
+import { toast } from "sonner";
 import {
   BarChart,
   Bar,
@@ -28,6 +29,10 @@ import {
 } from "lucide-react";
 
 import type { Transacao } from "@/lib/types/transacao";
+import {
+  buscarTransacoesNeon,
+  converterTransacaoNeon,
+} from "@/lib/transacoes-api";
 import { formatarMoeda } from "@/lib/formatters";
 import {
   calcularReceitas,
@@ -97,21 +102,34 @@ export default function ReportsPage() {
   const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
-    try {
-      const salvas = localStorage.getItem("transacoes");
+    let ativo = true;
 
-      if (salvas) {
-        const dados = JSON.parse(salvas);
+    async function carregarTransacoes() {
+      try {
+        const dados = await buscarTransacoesNeon();
+        const transacoesConvertidas = dados.map(converterTransacaoNeon);
 
-        if (Array.isArray(dados)) {
-          setTransacoes(dados);
+        if (ativo) {
+          setTransacoes(transacoesConvertidas);
+        }
+      } catch (erro) {
+        console.error("Erro ao carregar transações do Neon:", erro);
+
+        if (ativo) {
+          toast.error("Não foi possível carregar os relatórios.");
+        }
+      } finally {
+        if (ativo) {
+          setCarregando(false);
         }
       }
-    } catch (erro) {
-      console.error("Erro ao carregar transações:", erro);
-    } finally {
-      setCarregando(false);
     }
+
+    void carregarTransacoes();
+
+    return () => {
+      ativo = false;
+    };
   }, []);
 
   const anosDisponiveis = useMemo(() => {
@@ -216,27 +234,25 @@ export default function ReportsPage() {
   ).length;
 
   return (
-    <main className="min-h-screen min-w-0 flex-1 bg-gradient-to-br from-slate-100 via-blue-50/50 to-indigo-100/60 p-4 md:p-8 lg:p-10">
+    <main className="min-h-screen min-w-0 flex-1 bg-background text-foreground p-4 md:p-8 lg:p-10">
       <div className="mx-auto w-full max-w-7xl">
-        <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-blue-600">
+        <Link href="/" className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary">
           <ArrowLeft className="h-4 w-4" /> Voltar ao Dashboard
         </Link>
-
-        {/* Cabeçalho e filtros */}
         <div className="mb-7 flex flex-wrap items-end justify-between gap-5">
           <div>
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-blue-700">
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-primary">
               <ChartColumnIncreasing className="h-5 w-5" />
               <span className="text-sm font-medium">
                 Análise Financeira
               </span>
             </div>
 
-            <h1 className="text-3xl font-bold text-slate-900">
+            <h1 className="text-3xl font-bold text-foreground">
               Relatórios
             </h1>
 
-            <p className="mt-2 text-slate-500">
+            <p className="mt-2 text-muted-foreground">
               Acompanhe o desempenho das suas finanças.
             </p>
           </div>
@@ -245,7 +261,7 @@ export default function ReportsPage() {
             <div>
               <label
                 htmlFor="ano-relatorio"
-                className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700"
+                className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground"
               >
                 <CalendarDays className="h-4 w-4" />
                 Ano
@@ -257,7 +273,7 @@ export default function ReportsPage() {
                 onChange={(evento) =>
                   setAnoSelecionado(Number(evento.target.value))
                 }
-                className="h-11 min-w-32 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                className="h-11 min-w-32 rounded-xl border border-input bg-secondary px-3 text-sm text-foreground shadow-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/20"
               >
                 {anosDisponiveis.map((ano) => (
                   <option key={ano} value={ano}>
@@ -270,7 +286,7 @@ export default function ReportsPage() {
             <div>
               <label
                 htmlFor="mes-relatorio"
-                className="mb-2 block text-sm font-medium text-slate-700"
+                className="mb-2 block text-sm font-medium text-foreground"
               >
                 Mês
               </label>
@@ -281,7 +297,7 @@ export default function ReportsPage() {
                 onChange={(evento) =>
                   setMesSelecionado(evento.target.value)
                 }
-                className="h-11 min-w-44 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 shadow-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+                className="h-11 min-w-44 rounded-xl border border-input bg-secondary px-3 text-sm text-foreground shadow-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/20"
               >
                 <option value="todos">Todos os meses</option>
 
@@ -296,20 +312,18 @@ export default function ReportsPage() {
         </div>
 
         {carregando && (
-          <p role="status" className="mb-5 text-sm text-slate-500">Carregando dados financeiros...</p>
+          <p role="status" className="mb-5 text-sm text-muted-foreground">Carregando dados financeiros...</p>
         )}
-
-        {/* Indicadores do período */}
         <div className="mb-7 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm md:p-6">
-            <TrendingUp className="mb-4 h-6 w-6 text-emerald-600" />
-            <p className="text-sm text-slate-500">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm md:p-6">
+            <TrendingUp className="mb-4 h-6 w-6 text-emerald-400" />
+            <p className="text-sm text-muted-foreground">
               Receitas — {periodoTexto}
             </p>
-            <p className="mt-2 text-2xl font-bold text-emerald-600">
+            <p className="mt-2 text-2xl font-bold text-emerald-400">
               {formatarMoeda(receitas)}
             </p>
-            <p className="mt-3 text-xs text-slate-500">
+            <p className="mt-3 text-xs text-muted-foreground">
               {
                 transacoesDoPeriodo.filter(
                   (transacao) => transacao.tipo === "receita"
@@ -319,15 +333,15 @@ export default function ReportsPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm md:p-6">
-            <TrendingDown className="mb-4 h-6 w-6 text-red-600" />
-            <p className="text-sm text-slate-500">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm md:p-6">
+            <TrendingDown className="mb-4 h-6 w-6 text-rose-400" />
+            <p className="text-sm text-muted-foreground">
               Despesas — {periodoTexto}
             </p>
-            <p className="mt-2 text-2xl font-bold text-red-600">
+            <p className="mt-2 text-2xl font-bold text-rose-400">
               {formatarMoeda(despesas)}
             </p>
-            <p className="mt-3 text-xs text-slate-500">
+            <p className="mt-3 text-xs text-muted-foreground">
               {
                 transacoesDoPeriodo.filter(
                   (transacao) => transacao.tipo === "despesa"
@@ -337,56 +351,63 @@ export default function ReportsPage() {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm md:p-6">
-            <Wallet className="mb-4 h-6 w-6 text-blue-600" />
-            <p className="text-sm text-slate-500">
+          <div className="rounded-2xl border border-border bg-card p-5 shadow-sm md:p-6">
+            <Wallet className="mb-4 h-6 w-6 text-primary" />
+            <p className="text-sm text-muted-foreground">
               Saldo — {periodoTexto}
             </p>
             <p
               className={`mt-2 text-2xl font-bold ${
-                saldo >= 0 ? "text-blue-600" : "text-red-600"
+                saldo >= 0 ? "text-primary" : "text-rose-400"
               }`}
             >
               {formatarMoeda(saldo)}
             </p>
-            <p className="mt-3 text-xs text-slate-500">
+            <p className="mt-3 text-xs text-muted-foreground">
               Receitas menos despesas
             </p>
           </div>
         </div>
-
-        {/* Gráfico */}
-        <div className="mb-7 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm md:p-6">
-          <h2 className="text-xl font-semibold text-slate-900">
+        <div className="mb-7 rounded-2xl border border-border bg-card p-5 shadow-sm md:p-6">
+          <h2 className="text-xl font-semibold text-foreground">
             Receitas x Despesas por Mês
           </h2>
 
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Período selecionado: {periodoTexto}.
           </p>
 
           <div className="mt-8 h-80 min-w-0 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dadosMensais}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
-                <XAxis dataKey="mes" tickLine={false} axisLine={false} tick={{ fill: "#64748b", fontSize: 12 }} />
-                <YAxis tickLine={false} axisLine={false} tick={{ fill: "#64748b", fontSize: 12 }} width={72} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
+                <XAxis dataKey="mes" tickLine={false} axisLine={false} tick={{ fill: "#94a3b8", fontSize: 12 }} />
+                <YAxis tickLine={false} axisLine={false} tick={{ fill: "#94a3b8", fontSize: 12 }} width={72} />
                 <Tooltip
-                  formatter={(valor) =>
-                    formatarMoeda(Number(valor))
-                  }
-                />
-                <Legend />
+  cursor={{ fill: "transparent" }}
+  contentStyle={{
+    backgroundColor: "#182338",
+    border: "1px solid #334155",
+    borderRadius: 12,
+    color: "#f8fafc",
+  }}
+  labelStyle={{ color: "#f8fafc" }}
+  itemStyle={{ color: "#f8fafc" }}
+  formatter={(valor) =>
+    formatarMoeda(Number(valor))
+  }
+/>
+                <Legend wrapperStyle={{ color: "#94a3b8" }} />
                 <Bar
                   dataKey="receitas"
                   name="Receitas"
-                  fill="#10b981"
+                  fill="#4ade80"
                   radius={[5, 5, 0, 0]}
                 />
                 <Bar
                   dataKey="despesas"
                   name="Despesas"
-                  fill="#ef4444"
+                  fill="#fb7185"
                   radius={[5, 5, 0, 0]}
                 />
               </BarChart>
@@ -394,7 +415,7 @@ export default function ReportsPage() {
           </div>
 
           {transacoesDoPeriodo.length === 0 && (
-            <p className="mt-4 text-center text-sm text-slate-500">
+            <p className="mt-4 text-center text-sm text-muted-foreground">
               Nenhuma transação encontrada para este período.
             </p>
           )}
@@ -411,8 +432,6 @@ export default function ReportsPage() {
     mes={mesNumero}
   />
 </div>
-
-{/* Orçamento mensal e alertas */}
 <div className="mb-7">
   <MonthlyBudget
     transacoes={transacoes}
@@ -420,17 +439,15 @@ export default function ReportsPage() {
     mes={mesNumero}
   />
 </div>
-
-        {/* Comparação com o mesmo período do ano anterior */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm md:p-6">
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-sm md:p-6">
           <div className="mb-6 flex items-center gap-3">
-            <ArrowLeftRight className="h-6 w-6 text-blue-600" />
+            <ArrowLeftRight className="h-6 w-6 text-primary" />
 
             <div>
-              <h2 className="text-xl font-semibold text-slate-900">
+              <h2 className="text-xl font-semibold text-foreground">
                 Comparação de Períodos
               </h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 {periodoTexto} comparado com{" "}
                 {periodoAnteriorTexto}
               </p>
@@ -440,7 +457,7 @@ export default function ReportsPage() {
           <div className="overflow-x-auto">
             <table className="w-full min-w-[540px] text-left text-sm">
               <thead>
-                <tr className="border-b text-slate-500">
+                <tr className="border-b border-border text-muted-foreground">
                   <th className="pb-3 font-medium">Indicador</th>
                   <th className="pb-3 font-medium">
                     {anoSelecionado - 1}
@@ -453,12 +470,12 @@ export default function ReportsPage() {
               </thead>
 
               <tbody>
-                <tr className="border-b">
+                <tr className="border-b border-border">
                   <td className="py-4 font-medium">Receitas</td>
                   <td className="py-4">
                     {formatarMoeda(receitasAnteriores)}
                   </td>
-                  <td className="py-4 text-emerald-600">
+                  <td className="py-4 text-emerald-400">
                     {formatarMoeda(receitas)}
                   </td>
                   <td className="py-4">
@@ -466,12 +483,12 @@ export default function ReportsPage() {
                   </td>
                 </tr>
 
-                <tr className="border-b">
+                <tr className="border-b border-border">
                   <td className="py-4 font-medium">Despesas</td>
                   <td className="py-4">
                     {formatarMoeda(despesasAnteriores)}
                   </td>
-                  <td className="py-4 text-red-600">
+                  <td className="py-4 text-rose-400">
                     {formatarMoeda(despesas)}
                   </td>
                   <td className="py-4">
@@ -487,13 +504,13 @@ export default function ReportsPage() {
                   <td className="py-4">
                     {formatarMoeda(saldo)}
                   </td>
-                  <td className="py-4 text-slate-500">—</td>
+                  <td className="py-4 text-muted-foreground">—</td>
                 </tr>
               </tbody>
             </table>
           </div>
 
-          <p className="mt-5 text-xs text-slate-500">
+          <p className="mt-5 text-xs text-muted-foreground">
             A variação percentual utiliza o mesmo período
             do ano anterior como referência. Quando o valor
             anterior é zero, não há base de comparação.
@@ -501,7 +518,7 @@ export default function ReportsPage() {
         </div>
 
         {quantidadeSemData > 0 && (
-          <p className="mt-5 flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          <p className="mt-5 flex items-start gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-300">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <span>Atenção: {quantidadeSemData}{" "}
             {quantidadeSemData === 1

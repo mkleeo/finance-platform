@@ -208,16 +208,16 @@ function salvarOrcamentos() {
 
   if (mes === null) {
     return (
-      <section className="rounded-2xl border bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
         <div className="flex items-center gap-3">
-          <PiggyBank className="h-6 w-6 text-blue-600" />
+          <PiggyBank className="h-6 w-6 text-sky-400" />
 
-          <h2 className="text-xl font-semibold text-slate-900">
+          <h2 className="text-xl font-semibold text-foreground">
             Orçamento Mensal
           </h2>
         </div>
 
-        <p className="mt-3 text-sm text-slate-500">
+        <p className="mt-3 text-sm text-muted-foreground">
           Selecione um mês para configurar e acompanhar
           seus limites de gastos.
         </p>
@@ -226,16 +226,16 @@ function salvarOrcamentos() {
   }
 
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-sm">
       <div className="mb-6 flex items-center gap-3">
-        <PiggyBank className="h-6 w-6 text-blue-600" />
+        <PiggyBank className="h-6 w-6 text-sky-400" />
 
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">
+          <h2 className="text-xl font-semibold text-foreground">
             Orçamento Mensal
           </h2>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Defina limites e acompanhe seus gastos por categoria.
           </p>
         </div>
@@ -263,15 +263,15 @@ function salvarOrcamentos() {
           return (
             <div
               key={categoria}
-              className="rounded-xl border border-slate-100 p-4"
+              className="rounded-xl border border-border bg-muted/40 p-4"
             >
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <h3 className="font-semibold text-slate-800">
+                <h3 className="font-semibold text-foreground">
                   {categoria}
                 </h3>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-500">
+                  <span className="text-sm text-muted-foreground">
                     Limite R$
                   </span>
 
@@ -280,7 +280,7 @@ function salvarOrcamentos() {
                     min="0"
                     step="0.01"
                     placeholder="Ex.: 1000"
-                    className="w-36"
+                    className="w-36 border-input bg-background text-foreground"
                     value={valores[categoria] ?? ""}
                     onChange={(evento) =>
                       setValores((atual) => ({
@@ -294,11 +294,11 @@ function salvarOrcamentos() {
               </div>
 
               <div className="mb-2 flex justify-between gap-3 text-sm">
-                <span className="text-slate-500">
+                <span className="text-muted-foreground">
                   Gasto: {formatarMoeda(gasto)}
                 </span>
 
-                <span className="font-medium text-slate-700">
+                <span className="font-medium text-foreground">
                   {limite > 0
                     ? `${percentual
                         .toFixed(1)
@@ -307,7 +307,7 @@ function salvarOrcamentos() {
                 </span>
               </div>
 
-              <div className="h-3 overflow-hidden rounded-full bg-slate-100">
+              <div className="h-3 overflow-hidden rounded-full bg-muted">
                 <div
                   className={`h-full rounded-full ${corBarra}`}
                   style={{
@@ -324,8 +324,8 @@ function salvarOrcamentos() {
                 <p
                   className={`mt-3 flex items-center gap-2 text-sm ${
                     percentual >= 100
-                      ? "text-red-600"
-                      : "text-amber-600"
+                      ? "text-rose-400"
+                      : "text-amber-400"
                   }`}
                 >
                   <AlertTriangle className="h-4 w-4" />
@@ -344,14 +344,14 @@ function salvarOrcamentos() {
         <Button
           onClick={salvarOrcamentos}
           disabled={!carregado}
-          className="gap-2 bg-blue-600 hover:bg-blue-700"
+          className="gap-2 bg-sky-500 text-slate-950 hover:bg-sky-400"
         >
           <Save className="h-4 w-4" />
           Salvar orçamentos
         </Button>
       </div>
 
-      <p className="mt-4 text-xs text-slate-500">
+      <p className="mt-4 text-xs text-muted-foreground">
         Os limites são compartilhados entre os meses.
         Nesta versão, os mesmos valores são utilizados
         em todos os períodos.

@@ -20,32 +20,38 @@ export function BudgetAlertSummary({
 }: Props) {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-        <CheckCircle2 className="mb-2 h-5 w-5 text-emerald-600" />
-        <p className="text-sm text-emerald-700">
+      <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+        <CheckCircle2 className="mb-2 h-5 w-5 text-emerald-400" />
+
+        <p className="text-sm font-medium text-emerald-300">
           Dentro do limite
         </p>
-        <p className="text-2xl font-bold text-emerald-700">
+
+        <p className="mt-1 text-2xl font-bold text-emerald-400">
           {categoriasDentro}
         </p>
       </div>
 
-      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-        <AlertTriangle className="mb-2 h-5 w-5 text-amber-600" />
-        <p className="text-sm text-amber-700">
+      <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+        <AlertTriangle className="mb-2 h-5 w-5 text-amber-400" />
+
+        <p className="text-sm font-medium text-amber-300">
           Em atenção
         </p>
-        <p className="text-2xl font-bold text-amber-700">
+
+        <p className="mt-1 text-2xl font-bold text-amber-400">
           {categoriasAtencao}
         </p>
       </div>
 
-      <div className="rounded-xl border border-red-200 bg-red-50 p-4">
-        <ShieldAlert className="mb-2 h-5 w-5 text-red-600" />
-        <p className="text-sm text-red-700">
+      <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-4">
+        <ShieldAlert className="mb-2 h-5 w-5 text-rose-400" />
+
+        <p className="text-sm font-medium text-rose-300">
           Limite ultrapassado
         </p>
-        <p className="text-2xl font-bold text-red-700">
+
+        <p className="mt-1 text-2xl font-bold text-rose-400">
           {categoriasExcedidas}
         </p>
       </div>

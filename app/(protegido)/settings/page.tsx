@@ -128,44 +128,44 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="min-h-screen min-w-0 flex-1 bg-gradient-to-br from-slate-100 via-blue-50/50 to-indigo-100/60 p-4 md:p-8 lg:p-10">
+    <main className="min-h-screen min-w-0 flex-1 bg-background text-foreground p-4 md:p-8 lg:p-10">
       <div className="mx-auto w-full max-w-7xl">
         <Link
           href="/"
-          className="mb-6 inline-flex items-center gap-2 text-sm text-slate-500 transition-colors hover:text-blue-600"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-primary"
         >
           <ArrowLeft className="h-4 w-4" /> Voltar ao Dashboard
         </Link>
 
         <div className="mb-8">
-          <div className="mb-3 flex items-center gap-2 text-blue-600">
+          <div className="mb-3 flex items-center gap-2 text-primary">
             <Settings className="h-5 w-5" />
             <span className="text-sm font-medium">Preferências da plataforma</span>
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Configurações
           </h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Personalize sua experiência e gerencie seus dados financeiros.
           </p>
         </div>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
           <div className="space-y-6 xl:col-span-2">
-            <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+            <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="mb-6 flex items-start gap-3">
-                <span className="rounded-xl bg-blue-50 p-3 text-blue-600">
+                <span className="rounded-xl bg-primary/10 p-3 text-primary">
                   <UserRound className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">Perfil</h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <h2 className="text-lg font-semibold text-foreground">Perfil</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Informações de exibição da plataforma.
                   </p>
                 </div>
               </div>
 
-              <label htmlFor="nome" className="mb-2 block text-sm font-medium text-slate-700">
+              <label htmlFor="nome" className="mb-2 block text-sm font-medium text-foreground">
                 Nome de exibição
               </label>
               <Input
@@ -179,30 +179,30 @@ export default function SettingsPage() {
                 maxLength={80}
                 className="max-w-xl"
               />
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Essa preferência fica salva neste navegador.
               </p>
             </section>
 
-            <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+            <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="mb-6 flex items-start gap-3">
-                <span className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
+                <span className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
                   <Wallet className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900">
+                  <h2 className="text-lg font-semibold text-foreground">
                     Preferências financeiras
                   </h2>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Configurações monetárias do sistema.
                   </p>
                 </div>
               </div>
-              <label htmlFor="moeda" className="mb-2 block text-sm font-medium text-slate-700">
+              <label htmlFor="moeda" className="mb-2 block text-sm font-medium text-foreground">
                 Moeda
               </label>
               <Input id="moeda" value="Real brasileiro (BRL)" disabled className="max-w-xl" />
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Nesta versão, a plataforma utiliza apenas o real brasileiro.
               </p>
             </section>
@@ -212,7 +212,7 @@ export default function SettingsPage() {
                 type="button"
                 onClick={salvarPreferencias}
                 disabled={!carregado}
-                className="gap-2 rounded-xl bg-blue-600 hover:bg-blue-700"
+                className="gap-2 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <Save className="h-4 w-4" /> Salvar configurações
               </Button>
@@ -220,24 +220,24 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-6">
-            <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+            <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="mb-5 flex items-center gap-3">
-                <span className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
+                <span className="rounded-xl bg-primary/10 p-3 text-primary">
                   <Database className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 className="font-semibold text-slate-900">Seus dados</h2>
-                  <p className="text-xs text-slate-500">Armazenamento local</p>
+                  <h2 className="font-semibold text-foreground">Seus dados</h2>
+                  <p className="text-xs text-muted-foreground">Dados locais</p>
                 </div>
               </div>
               <div className="space-y-3">
-                <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3">
-                  <span className="text-sm text-slate-600">Transações</span>
-                  <span className="font-semibold text-slate-900">{quantidadeTransacoes}</span>
+                <div className="flex items-center justify-between rounded-xl bg-muted p-3">
+                  <span className="text-sm text-muted-foreground">Transações locais</span>
+                  <span className="font-semibold text-foreground">{quantidadeTransacoes}</span>
                 </div>
-                <div className="flex items-center justify-between rounded-xl bg-slate-50 p-3">
-                  <span className="text-sm text-slate-600">Limites configurados</span>
-                  <span className="font-semibold text-slate-900">{quantidadeOrcamentos}</span>
+                <div className="flex items-center justify-between rounded-xl bg-muted p-3">
+                  <span className="text-sm text-muted-foreground">Limites configurados</span>
+                  <span className="font-semibold text-foreground">{quantidadeOrcamentos}</span>
                 </div>
               </div>
               <Button
@@ -247,24 +247,24 @@ export default function SettingsPage() {
                 disabled={!carregado}
                 className="mt-5 w-full gap-2 rounded-xl"
               >
-                <Download className="h-4 w-4" /> Exportar backup JSON
+                <Download className="h-4 w-4" /> Exportar dados locais (JSON)
               </Button>
-              <p className="mt-3 text-xs leading-relaxed text-slate-500">
-                O backup inclui transações, orçamentos e preferências. Guarde o arquivo em local seguro.
+              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                Este backup inclui apenas dados salvos neste navegador. Não inclui transações armazenadas no Neon.
               </p>
             </section>
 
-            <section className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+            <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
               <div className="flex items-start gap-3">
-                <span className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
+                <span className="rounded-xl bg-emerald-500/10 p-3 text-emerald-400">
                   <ShieldCheck className="h-5 w-5" />
                 </span>
                 <div>
-                  <h2 className="font-semibold text-slate-900">Armazenamento</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-500">
-                    Os dados são armazenados no navegador deste dispositivo, sem sincronização com uma conta.
+                  <h2 className="font-semibold text-foreground">Armazenamento</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    As preferências e os limites ficam neste navegador. As transações da conta são armazenadas no banco de dados.
                   </p>
-                  <p className="mt-3 flex items-center gap-2 text-xs text-emerald-700">
+                  <p className="mt-3 flex items-center gap-2 text-xs text-emerald-400">
                     <CheckCircle2 className="h-4 w-4" /> Exportação disponível
                   </p>
                 </div>

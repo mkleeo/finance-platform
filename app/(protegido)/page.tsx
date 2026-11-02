@@ -71,14 +71,8 @@ import { Button } from "@/components/ui/button";
 
 
 export default function Home() {
-  const [transacoes, setTransacoes] = useState<Transacao[]>([
-    { id: 1, descricao: "Salário", valor: 5000, tipo: "receita" },
-    { id: 2, descricao: "Freelancer", valor: 7000, tipo: "receita" },
-    { id: 3, descricao: "Aluguel", valor: 2000, tipo: "despesa" },
-    { id: 4, descricao: "Supermercado", valor: 1500, tipo: "despesa" },
-  ]);
+  const [transacoes, setTransacoes] = useState<Transacao[]>([]);
 
-  const [carregando, setCarregando] = useState(true);
   
 const [salvandoTransacao, setSalvandoTransacao] = useState(false);
 
@@ -89,7 +83,7 @@ const [excluindoTransacao, setExcluindoTransacao] = useState(false);
 
 
 useEffect(() => {
-  async function testarConexaoNeon() {
+  async function carregarTransacoes() {
     try {
       const dados = await buscarTransacoesNeon();
 
@@ -103,28 +97,15 @@ setTransacoes(transacoesConvertidas);
     }
   }
 
-  testarConexaoNeon();
+  carregarTransacoes();
 }, []);
 
   
-useEffect(() => {
-  setCarregando(false);
-}, []);
+
 
 
 
   
-  // Gravação no localStorage desativada temporariamente.
-  // Os dados antigos estão preservados para a migração.
-  /*
-  useEffect(() => {
-    if (!carregando) {
-      localStorage.setItem("transacoes", JSON.stringify(transacoes));
-    }
-  }, [transacoes, carregando]);
-  */
-
-
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
   const [tipo, setTipo] = useState<"receita" | "despesa">("despesa");
@@ -536,13 +517,13 @@ toast.success("Exportação iniciada!", {
 };
 
   return (
-    <main className="min-h-screen min-w-0 flex-1 bg-gradient-to-br from-slate-100 via-blue-50/50 to-indigo-100/60 p-4 md:p-8">
+    <main className="min-h-screen min-w-0 flex-1 bg-background text-foreground p-4 md:p-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Dashboard
           </h1>
 
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-muted-foreground">
             Acompanhe suas receitas, despesas e seu saldo em um só lugar.
           </p>
         </div>
@@ -593,17 +574,17 @@ toast.success("Exportação iniciada!", {
           </div>
         </div>
 
-        <section className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <section className="mb-8 rounded-2xl border border-border bg-card p-6 shadow-sm">
           <div className="mb-5 flex items-center gap-3">
-            <div className="rounded-xl bg-blue-50 p-2.5">
+            <div className="rounded-xl bg-primary/10 p-2.5">
               {idEmEdicao !== null ? (
-                <Pencil className="h-5 w-5 text-blue-600" />
+                <Pencil className="h-5 w-5 text-primary" />
               ) : (
-                <PlusCircle className="h-5 w-5 text-blue-600" />
+                <PlusCircle className="h-5 w-5 text-primary" />
               )}
             </div>
 
-            <h2 className="text-xl font-bold tracking-tight text-slate-900">
+            <h2 className="text-xl font-bold tracking-tight text-foreground">
               {idEmEdicao !== null ? "Editar Transação" : "Nova Transação"}
             </h2>
           </div>
@@ -620,7 +601,7 @@ toast.success("Exportação iniciada!", {
                 onChange={(e) => setDescricao(e.target.value)}
               />
 
-              <p className="text-right text-xs text-slate-400">
+              <p className="text-right text-xs text-muted-foreground">
                 {descricao.length}/100 caracteres
               </p>
             </div>
@@ -703,7 +684,7 @@ disabled={salvandoTransacao || salvandoEdicao}
             <Button
               type="button"
               variant="outline"
-              className="ml-3 mt-5 rounded-xl border-slate-200 px-5 py-5 font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900"
+              className="ml-3 mt-5 rounded-xl border-border px-5 py-5 font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               onClick={cancelarEdicao}
             >
               Cancelar Edição
@@ -719,17 +700,17 @@ disabled={salvandoTransacao || salvandoEdicao}
 
         <section className="mt-8">
           <div className="mb-5">
-            <h2 className="text-xl font-bold tracking-tight text-slate-900">
+            <h2 className="text-xl font-bold tracking-tight text-foreground">
               Análise de Despesas
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-muted-foreground">
               Visualize como seus gastos estão distribuídos por categoria.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border bg-white p-6 shadow-sm">
+            <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
               <h3 className="mb-4 text-lg font-semibold">
                 Distribuição das Despesas
               </h3>
@@ -774,16 +755,16 @@ disabled={salvandoTransacao || salvandoEdicao}
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <p className="text-slate-500">Nenhuma despesa cadastrada.</p>
+                <p className="text-muted-foreground">Nenhuma despesa cadastrada.</p>
               )}
             </div>
 
-            <div className="rounded-xl border bg-white p-6">
-              <h3 className="mb-4 text-lg font-semibold text-slate-900">
+            <div className="rounded-xl border border-border bg-card p-6">
+              <h3 className="mb-4 text-lg font-semibold text-foreground">
                 Resumo por Categoria
               </h3>
               {Object.entries(despesasPorCategoria).length === 0 ? (
-                <p className="text-slate-500">Nenhuma despesa cadastrada.</p>
+                <p className="text-muted-foreground">Nenhuma despesa cadastrada.</p>
               ) : (
                 Object.entries(despesasPorCategoria).map(
                   ([nomeCategoria, total]) => (
@@ -795,17 +776,17 @@ disabled={salvandoTransacao || salvandoEdicao}
                         <span>{nomeCategoria}</span>
 
                         <div className="text-right">
-                          <p className="font-bold text-red-600">
+                          <p className="font-bold text-rose-400">
                             {formatarMoeda(total)}
                           </p>
 
-                          <p className="mt-1 text-xs text-slate-500">
+                          <p className="mt-1 text-xs text-muted-foreground">
                             {calcularPorcentagem(total, totalDespesasGrafico)}% das despesas
                           </p>
                         </div>
                       </div>
 
-                      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100">
+                      <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
                         <div
                           className="h-full rounded-full transition-all duration-300"
                           style={{
@@ -846,11 +827,11 @@ disabled={salvandoTransacao || salvandoEdicao}
   </Button>
 </div>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-muted-foreground">
   Acompanhe e gerencie suas receitas e despesas.
 </p>
 
-<p className="mt-2 text-sm font-medium text-blue-600">
+<p className="mt-2 text-sm font-medium text-primary">
   {transacoesFiltradas.length}{" "}
   {transacoesFiltradas.length === 1
     ? "transação encontrada"
@@ -858,30 +839,30 @@ disabled={salvandoTransacao || salvandoEdicao}
 </p>
 
 <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
-<div className="rounded-lg border border-green-200 bg-green-50 p-4">
+<div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4">
   <div className="flex items-center gap-2">
-  <TrendingUp className="h-5 w-5 text-green-600" />
+  <TrendingUp className="h-5 w-5 text-emerald-400" />
 
-  <p className="text-sm text-green-700">
+  <p className="text-sm text-emerald-400">
     Receitas encontradas
   </p>
 </div>
 
-  <p className="mt-2 text-xl font-bold text-green-600">
+  <p className="mt-2 text-xl font-bold text-emerald-400">
     {formatarMoeda(totalReceitasFiltradas)}
   </p>
 </div>
 
-<div className="rounded-lg border border-red-200 bg-red-50 p-4">
+<div className="rounded-lg border border-rose-500/30 bg-rose-500/10 p-4">
   <div className="flex items-center gap-2">
-  <TrendingDown className="h-5 w-5 text-red-600" />
+  <TrendingDown className="h-5 w-5 text-rose-400" />
 
-  <p className="text-sm text-red-700">
+  <p className="text-sm text-rose-400">
     Despesas encontradas
   </p>
 </div>
 
-  <p className="mt-2 text-xl font-bold text-red-600">
+  <p className="mt-2 text-xl font-bold text-rose-400">
     {formatarMoeda(totalDespesasFiltradas)}
   </p>
 </div>
@@ -889,20 +870,20 @@ disabled={salvandoTransacao || salvandoEdicao}
 <div
   className={`rounded-lg border p-4 ${
     saldoFiltrado >= 0
-      ? "border-blue-200 bg-blue-50"
-      : "border-red-200 bg-red-50"
+      ? "border-primary/30 bg-primary/10"
+      : "border-rose-500/30 bg-rose-500/10"
   }`}
 >
   <div className="flex items-center gap-2">
   <Wallet
     className={`h-5 w-5 ${
-      saldoFiltrado >= 0 ? "text-blue-600" : "text-red-600"
+      saldoFiltrado >= 0 ? "text-primary" : "text-rose-400"
     }`}
   />
 
   <p
     className={`text-sm ${
-      saldoFiltrado >= 0 ? "text-blue-700" : "text-red-700"
+      saldoFiltrado >= 0 ? "text-primary" : "text-rose-400"
     }`}
   >
     Saldo encontrado
@@ -911,7 +892,7 @@ disabled={salvandoTransacao || salvandoEdicao}
 
   <p
     className={`mt-2 text-xl font-bold ${
-      saldoFiltrado >= 0 ? "text-blue-600" : "text-red-600"
+      saldoFiltrado >= 0 ? "text-primary" : "text-rose-400"
     }`}
   >
     {formatarMoeda(saldoFiltrado)}
@@ -922,7 +903,7 @@ disabled={salvandoTransacao || salvandoEdicao}
           </div>
           <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center">
           <div className="relative w-full md:max-w-md">
-  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 
   <Input
     type="text"
@@ -936,7 +917,7 @@ disabled={salvandoTransacao || salvandoEdicao}
     <button
       type="button"
       onClick={() => setBusca("")}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-700"
+      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
       aria-label="Limpar pesquisa"
       title="Limpar pesquisa"
     >
@@ -991,16 +972,16 @@ disabled={salvandoTransacao || salvandoEdicao}
 )}
          </div>
 
-          <div className="overflow-hidden rounded-xl border bg-white">
+          <div className="overflow-hidden rounded-xl border border-border bg-card">
             {transacoesFiltradas.length === 0 && (
   <div className="flex flex-col items-center justify-center p-10 text-center">
-    <Wallet className="mb-3 h-10 w-10 text-slate-300" />
+    <Wallet className="mb-3 h-10 w-10 text-muted-foreground" />
 
-    <h3 className="text-lg font-semibold text-slate-700">
+    <h3 className="text-lg font-semibold text-foreground">
       Nenhuma transação encontrada
     </h3>
 
-    <p className="mt-2 text-sm text-slate-500">
+    <p className="mt-2 text-sm text-muted-foreground">
       Não existem transações para os filtros selecionados.
     </p>
   </div>
@@ -1009,12 +990,12 @@ disabled={salvandoTransacao || salvandoEdicao}
             {transacoesFiltradas.map((transacao) => (
               <div
                 key={transacao.id}
-                className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 p-4 transition-colors duration-200 hover:bg-slate-50 last:border-b-0"
+                className="flex flex-wrap items-center justify-between gap-4 border-b border-border p-4 transition-colors duration-200 hover:bg-accent last:border-b-0"
               >
                 <div>
                   <p className="font-medium">{transacao.descricao}</p>
                   {transacao.data && (
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-muted-foreground">
                       {formatarData(transacao.data)}
                     </p>
                   )}
@@ -1023,14 +1004,14 @@ disabled={salvandoTransacao || salvandoEdicao}
                     <span
                       className={`rounded-full px-2.5 py-1 text-xs font-medium ${
                         transacao.tipo === "receita"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : "bg-red-50 text-red-700"
+                          ? "bg-emerald-500/10 text-emerald-400"
+                          : "bg-rose-500/10 text-rose-400"
                       }`}
                     >
                       {transacao.tipo === "receita" ? "Receita" : "Despesa"}
                     </span>
 
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-muted-foreground">
                       {transacao.categoria ?? "Outros"}
                     </span>
                   </div>
@@ -1040,8 +1021,8 @@ disabled={salvandoTransacao || salvandoEdicao}
                   <p
                     className={
                       transacao.tipo === "receita"
-                        ? "font-bold text-green-600"
-                        : "font-bold text-red-600"
+                        ? "font-bold text-emerald-400"
+                        : "font-bold text-rose-400"
                     }
                   >
                     {transacao.tipo === "receita" ? "+" : "-"}
@@ -1051,7 +1032,7 @@ disabled={salvandoTransacao || salvandoEdicao}
                   <button
                     type="button"
                     onClick={() => editarTransacao(transacao.id)}
-                    className="rounded-lg p-2 text-blue-600 transition-colors hover:bg-blue-50"
+                    className="rounded-lg p-2 text-primary transition-colors hover:bg-primary/10"
                     title="Editar transação"
                     aria-label={`Editar ${transacao.descricao}`}
                   >
@@ -1059,7 +1040,7 @@ disabled={salvandoTransacao || salvandoEdicao}
                   </button>
 
                   <Button
-                    className="rounded-lg bg-transparent text-red-600 shadow-none hover:bg-red-50 hover:text-red-700"
+                    className="rounded-lg bg-transparent text-rose-400 shadow-none hover:bg-rose-500/10 hover:text-rose-400"
                     variant="ghost"
                     size="icon"
                     
@@ -1070,7 +1051,7 @@ onClick={() => {
 
                     aria-label={`Excluir ${transacao.descricao}`}
                   >
-                    <Trash2 className="h-4 w-4 text-red-600" />
+                    <Trash2 className="h-4 w-4 text-rose-400" />
                   </Button>
                 </div>
               </div>
@@ -1099,12 +1080,12 @@ onClick={() => {
 
       <AlertDialogDescription>
   Tem certeza de que deseja excluir a transação{" "}
-  <strong className="font-semibold text-slate-900">
+  <strong className="font-semibold text-foreground">
     {transacoes.find((transacao) => transacao.id === idParaExcluir)?.descricao ??
       "selecionada"}
   </strong>
   {" "}no valor de{" "}
-<strong className="font-semibold text-slate-900">
+<strong className="font-semibold text-foreground">
   {formatarMoeda(
     transacoes.find((transacao) => transacao.id === idParaExcluir)?.valor ?? 0
   )}
@@ -1120,7 +1101,7 @@ onClick={() => {
 
       
 <AlertDialogAction
-  className="bg-red-600 text-white hover:bg-red-700"
+  className="bg-rose-600 text-white hover:bg-rose-700"
   disabled={excluindoTransacao}
   onClick={(evento) => {
     evento.preventDefault();

@@ -25,7 +25,7 @@ export function DashboardSummary({
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       <Card className="border-0 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-slate-500">
+          <CardTitle className="text-sm font-medium text-slate-400">
             Saldo Total
           </CardTitle>
 
@@ -35,11 +35,11 @@ export function DashboardSummary({
         </CardHeader>
 
         <CardContent>
-          <p className="text-3xl font-bold tracking-tight text-slate-900">
+          <p className="text-3xl font-bold tracking-tight text-sky-400">
             {formatarMoeda(saldo)}
           </p>
 
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-slate-400">
             Saldo do período selecionado
           </p>
         </CardContent>
@@ -47,7 +47,7 @@ export function DashboardSummary({
 
       <Card className="border-0 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-slate-500">
+          <CardTitle className="text-sm font-medium text-slate-400">
             Receitas
           </CardTitle>
 
@@ -61,7 +61,7 @@ export function DashboardSummary({
             {formatarMoeda(receitas)}
           </p>
 
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-slate-400">
             Total de receitas do período
           </p>
         </CardContent>
@@ -69,7 +69,7 @@ export function DashboardSummary({
 
       <Card className="border-0 shadow-sm">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-slate-500">
+          <CardTitle className="text-sm font-medium text-slate-400">
             Despesas
           </CardTitle>
 
@@ -83,7 +83,7 @@ export function DashboardSummary({
             {formatarMoeda(despesas)}
           </p>
 
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-slate-400">
             Total de despesas do período
           </p>
         </CardContent>
