@@ -1,4 +1,3 @@
-
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -7,6 +6,12 @@ const nextConfig: NextConfig = {
   },
 
   cacheComponents: false,
+
+  serverExternalPackages: [
+    "@prisma/client",
+    "@prisma/adapter-pg",
+    "pg",
+  ],
 
   turbopack: {
     rules: {
