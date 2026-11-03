@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useDemo } from "./demo-context";
 import Link from "next/link";
 import { toast } from "sonner";
 import {
@@ -49,9 +50,7 @@ function dataLocal() {
 }
 
 export default function DemoPage() {
-  const [transacoes, setTransacoes] = useState<Transacao[]>(() =>
-    transacoesDemo.map((item) => ({ ...item }))
-  );
+  const { transacoes, setTransacoes, restaurar } = useDemo();
 
   const [descricao, setDescricao] = useState("");
   const [valor, setValor] = useState("");
@@ -194,7 +193,7 @@ export default function DemoPage() {
   function restaurarDemo() {
     if (!window.confirm("Restaurar os dados iniciais da Demo?")) return;
 
-    setTransacoes(transacoesDemo.map((item) => ({ ...item })));
+    restaurar();
     setPeriodo("todos");
     setFiltroTipo("todos");
     setFiltroCategoria("todas");
